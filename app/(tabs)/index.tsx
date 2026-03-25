@@ -88,7 +88,7 @@ export default function LinguaScreen() {
   const [confirmText, setConfirmText] = useState('');
   const [confirmFrom, setConfirmFrom] = useState('es');
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;  
   const progressAnim = useRef(new Animated.Value(0)).current;
   const warnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalRef = useRef('');
@@ -195,25 +195,25 @@ export default function LinguaScreen() {
   }
 
   async function confirmTranslation(toCode: string) {
-    setTargetLang(toCode);
-    setPhase('translating');
-    try {
-      const result = await translateText(confirmText, confirmFrom, toCode);
-      setTranslation(result);
-      addHistory(confirmText, result, confirmFrom, toCode);
-      setPhase('speaking');
-      const speechLang = LANGS[toCode]?.speech || 'en-US';
-      Speech.speak(result, {
-        language: speechLang,
-        rate: 0.9,
-        onDone: () => setPhase('idle'),
-        onError: () => setPhase('idle'),
-      });
-    } catch {
-      Alert.alert('Error', 'No se pudo traducir. Verifica tu conexión.');
-      setPhase('idle');
-    }
+  setTargetLang(toCode);
+  setPhase('translating');
+  try {
+    const result = await translateText(confirmText, confirmFrom, toCode);
+    setTranslation(result);                                    // ← LÍNEA 1 que faltaba
+    addHistory(confirmText, result, confirmFrom, toCode);      // ← LÍNEA 2 que faltaba
+    setPhase('speaking');
+    const speechLang = LANGS[toCode]?.speech || 'en-US';
+    Speech.speak(result, {
+      language: speechLang,
+      rate: 0.9,
+      onDone: () => setPhase('idle'),
+      onError: () => setPhase('idle'),
+    });
+  } catch (e: any) {
+    Alert.alert('Error de traducción', e?.message || JSON.stringify(e) || 'Error desconocido');
+    setPhase('idle');
   }
+}
 
   function addHistory(orig: string, trl: string, from: string, to: string) {
     const item: HistoryItem = {
